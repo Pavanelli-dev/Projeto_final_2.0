@@ -1,0 +1,101 @@
+FIXTRACK - SISTEMA DE MANUTENÇÃO SENAI
+
+1. INSTALAÇÃO E INICIALIZAÇÃO
+
+1) Abra o terminal dentro da pasta do projeto.
+2) Execute: npm install
+3) Execute: npm start
+4) Abra no navegador: http://localhost:3000
+
+O banco SQLite é criado/atualizado automaticamente na primeira inicialização.
+Os chamados antigos são preservados. As tabelas de usuários, salas e equipamentos,
+além da coluna de identificação do cliente, são criadas/adicionadas sem apagar
+os registros existentes.
+
+2. TIPOS DE ACESSO
+
+ADMINISTRADOR
+Usuário inicial: admin
+Senha inicial: admin123
+
+Pode acessar o dashboard, consultar ocorrências, acompanhar relatórios e
+atualizar o status dos chamados, incluindo Pendente, Em análise, Em processo,
+Concluída e Cancelada. Esse perfil mantém as funções administrativas que já
+existiam no painel.
+
+ADMINISTRADOR-CHEFE
+Usuário inicial: chefe
+Senha inicial: FixTrack@2026
+
+Tem as mesmas permissões do administrador e também acessa as abas "Usuários" e "Cadastros".
+Na aba Usuários, pode criar clientes e administradores, remover acessos e reativar perfis inativos.
+Na aba Cadastros, pode adicionar e desativar salas e tipos de equipamentos que aparecem no formulário do cliente.
+
+CLIENTE
+O cliente não faz o próprio cadastro. O administrador-chefe cria previamente
+seu ID e sua senha. Depois, o cliente entra pela tela de login e é direcionado
+ao Portal do cliente, onde pode registrar uma ocorrência e acompanhar somente
+os chamados que ele mesmo abriu.
+
+IMPORTANTE SOBRE AS SENHAS INICIAIS
+Altere as senhas padrão antes de colocar o sistema em uso real. Para configurar
+as credenciais iniciais antes da primeira execução, defina as variáveis de
+ambiente ADMIN_USER, ADMIN_PASSWORD, CHEFE_USER e CHEFE_PASSWORD.
+As contas iniciais só são criadas quando ainda não existe uma conta com aquele
+ID no banco.
+
+3. REGISTRO DE OCORRÊNCIAS PELO CLIENTE
+
+O formulário do cliente mantém as opções que existiam no bot:
+- Lab de Informática 01 (LAB-01)
+- Lab de Informática 02 (LAB-02)
+- Oficina Mecânica (OFICINA-01)
+- Computador, Ar Condicionado ou Projetor
+
+O cliente também pode acrescentar uma descrição opcional. Ao registrar, o
+chamado aparece no histórico do cliente e no painel administrativo. As opções
+de salas e equipamentos são carregadas automaticamente dos cadastros ativos.
+
+4. TELEGRAM (OPCIONAL)
+
+O portal web substitui o fluxo do bot para o cliente. O bot foi mantido como
+integração opcional, mas agora exige duas variáveis de ambiente:
+
+- TELEGRAM_BOT_TOKEN: token fornecido pelo BotFather.
+- FIXTRACK_TELEGRAM_API_KEY: chave privada compartilhada entre o bot e o servidor.
+
+PowerShell (use valores próprios):
+$env:TELEGRAM_BOT_TOKEN="NOVO_TOKEN_DO_BOT"
+$env:FIXTRACK_TELEGRAM_API_KEY="UMA_CHAVE_PRIVADA_FORTE"
+npm run bot
+
+O servidor precisa estar ativo em outro terminal. Para usar outro endereço,
+defina também FIXTRACK_API_URL, por exemplo http://192.168.0.10:3000.
+
+SEGURANÇA: o arquivo que foi enviado continha um token real do Telegram.
+Esse token foi removido do código, mas deve ser revogado no BotFather e
+substituído por um novo antes de voltar a usar a integração.
+
+5. ESP32
+
+A API de status continua disponível em:
+http://SEU_IP:3000/api/status-sala/LAB-01
+
+Se o ESP32 estiver em outra rede, use o IP do computador que esteja acessível
+pela mesma rede do ESP32.
+
+6. REGRAS DE EXCLUSÃO E CADASTROS
+
+- Excluir um perfil desativa o acesso imediatamente e encerra suas sessões.
+- O histórico de chamados não é apagado quando um perfil é desativado.
+- Perfis inativos podem ser reativados pelo administrador-chefe. O ID permanece reservado, evitando criar uma segunda conta com o mesmo login.
+- Salas e equipamentos podem ser desativados e reativados sem alterar chamados antigos.
+- O perfil de administrador-chefe é protegido contra exclusão pela própria tela.
+
+7. OBSERVAÇÕES
+
+- O servidor utiliza Node.js, Express e SQLite.
+- As senhas são armazenadas com hash e salt usando o módulo crypto do Node.js.
+- As rotas administrativas verificam o perfil do usuário no servidor.
+- Clientes não conseguem consultar chamados de outras contas.
+- O visual principal do login e do painel foi preservado.
